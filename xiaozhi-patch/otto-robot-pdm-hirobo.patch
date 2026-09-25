@@ -1,0 +1,53 @@
+diff -ru a/main/boards/otto-robot/config.h b/main/boards/otto-robot/config.h
+--- a/main/boards/otto-robot/config.h	2026-09-10 15:40:56.000000000 +0800
++++ b/main/boards/otto-robot/config.h	2026-09-25 19:53:22.866117762 +0800
+@@ -122,7 +122,7 @@
+     .audio_i2s_gpio_din = GPIO_NUM_NC,
+     .audio_i2s_gpio_dout = GPIO_NUM_NC,
+ 
+-    .audio_i2s_mic_gpio_ws = GPIO_NUM_4,
++    .audio_i2s_mic_gpio_ws = GPIO_NUM_NC,  // PDM mic: no WS
+     .audio_i2s_mic_gpio_sck = GPIO_NUM_5,
+     .audio_i2s_mic_gpio_din = GPIO_NUM_6,
+     .audio_i2s_spk_gpio_dout = GPIO_NUM_7,
+diff -ru a/main/boards/otto-robot/config.json b/main/boards/otto-robot/config.json
+--- a/main/boards/otto-robot/config.json	2026-09-10 15:40:56.000000000 +0800
++++ b/main/boards/otto-robot/config.json	2026-09-25 19:53:22.866146175 +0800
+@@ -11,8 +11,16 @@
+             "sdkconfig_append": [
+                 "CONFIG_HTTPD_WS_SUPPORT=y",
+                 "CONFIG_CAMERA_OV2640=y",
+-                "CONFIG_CAMERA_OV3660=y"
++                "CONFIG_CAMERA_OV3660=y",
++                "CONFIG_USE_AFE_WAKE_WORD=n",
++                "CONFIG_USE_CUSTOM_WAKE_WORD=y",
++                "CONFIG_CUSTOM_WAKE_WORD=\"hi robo\"",
++                "CONFIG_CUSTOM_WAKE_WORD_DISPLAY=\"Hi Robo\"",
++                "CONFIG_CUSTOM_WAKE_WORD_THRESHOLD=20",
++                "CONFIG_SR_WN_WN9_NIHAOXIAOZHI_TTS=n",
++                "CONFIG_SR_MN_EN_NONE=n",
++                "CONFIG_SR_MN_EN_MULTINET6_QUANT=y"
+             ]
+         }
+     ]
+-}
++}
+\ No newline at end of file
+diff -ru a/main/boards/otto-robot/otto_robot.cc b/main/boards/otto-robot/otto_robot.cc
+--- a/main/boards/otto-robot/otto_robot.cc	2026-09-10 15:40:56.000000000 +0800
++++ b/main/boards/otto-robot/otto_robot.cc	2026-09-25 19:53:22.866412464 +0800
+@@ -328,11 +328,12 @@
+ 
+     void InitializeAudioCodec() {
+         if (hw_config_.audio_use_simplex) {
+-            audio_codec_ = new NoAudioCodecSimplex(
++            // Spotpear Robot v2.2 board: onboard mic is PDM (CLK=GPIO5, DATA=GPIO6)
++            audio_codec_ = new NoAudioCodecSimplexPdm(
+                 hw_config_.audio_input_sample_rate, hw_config_.audio_output_sample_rate,
+                 hw_config_.audio_i2s_spk_gpio_bclk, hw_config_.audio_i2s_spk_gpio_lrck,
+                 hw_config_.audio_i2s_spk_gpio_dout, hw_config_.audio_i2s_mic_gpio_sck,
+-                hw_config_.audio_i2s_mic_gpio_ws, hw_config_.audio_i2s_mic_gpio_din);
++                hw_config_.audio_i2s_mic_gpio_din);
+         } else {
+             audio_codec_ = new NoAudioCodecDuplex(
+                 hw_config_.audio_input_sample_rate, hw_config_.audio_output_sample_rate,
