@@ -1,5 +1,7 @@
 # Spotpear ESP32-S3 dancing robot: fixing the silent microphone
 
+<p align="center"><img src="images/robot.jpg" alt="Spotpear ESP32-S3 AI dancing robot" width="400"></p>
+
 This is a fix for the **Spotpear ESP32-S3-AI-Robot-(A)**, an Otto-style dancing robot that runs [xiaozhi-esp32](https://github.com/78/xiaozhi-esp32) firmware. The board silkscreen reads "Robot v2.2 2026/06/24".
 
 ## The problem
